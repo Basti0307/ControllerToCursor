@@ -1,0 +1,29 @@
+[hotkeys]
+toggle_emulation = "DP-D"
+toggle_combo_2 = "Y"
+toggle_combo_3 = ""
+toggle_combo_4 = ""
+quit = "DP-U"
+left_click = "A"
+right_click = "B"
+speed_boost = "LS"
+sniper_mode = "LB"
+speech_to_text = "DP-L"
+on_screen_keyboard = "DP-R"
+
+[mouse]
+sensitivity = 5
+sniper_factor = 0.3
+
+[buttons]
+A = 0
+B = 1
+X = 2
+Y = 3
+left_bumper = 4
+right_bumper = 5
+back_button = 6
+start_button = 7
+left_stick_click = 8
+right_stick_click = 9
+
