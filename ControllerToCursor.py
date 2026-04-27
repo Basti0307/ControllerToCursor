@@ -482,6 +482,16 @@ class App(tk.Tk):
         self._hk_listen_prev_emu = True
         self._hk_assign_buttons = {}
         self.resizable(True, True)
+        # Icon logic
+        try:
+            if getattr(sys, 'frozen', False):
+                base_dir = sys._MEIPASS
+            else:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+            icon_path = os.path.join(base_dir, "icon.ico")
+            self.iconbitmap(icon_path)
+        except Exception:
+            pass
 
         self._build_ui()
         self.bind("<Escape>", self._on_escape)
@@ -543,14 +553,14 @@ class App(tk.Tk):
         left.pack(side="left", fill="y", padx=20, pady=14)
         tk.Label(
             left,
-            text="Controller Mouse",
+            text="ControllerToCursor",
             font=self.FT,
             bg=self.PANEL,
             fg=self.TEXT,
         ).pack(anchor="w")
         tk.Label(
             left,
-            text="Gamepad to mouse and keyboard — settings and live status in one place.",
+            text="Gamepad to mouse and keyboard — GUI Version.",
             font=self.FSM,
             bg=self.PANEL,
             fg=self.MUTED,
