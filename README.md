@@ -4,7 +4,7 @@ A full-featured gamepad-to-mouse emulator with a clean dark GUI — use any cont
 
 
 
-#### Installation \& Usage
+### Installation \& Usage
 
 1. Go to the [Releases](https://github.com/Basti0307/ControllerToCursor/releases) page.
 2. Download `ControllerToCursor.exe`.
@@ -15,7 +15,22 @@ A full-featured gamepad-to-mouse emulator with a clean dark GUI — use any cont
 
 
 
-#### Features
+### On-Screen Keyboard (FreeVK)
+
+The **On Screen Keyboard** hotkey launches [FreeVK](https://freevirtualkeyboard.com/) — a free, lightweight virtual keyboard for Windows.
+
+**To use this feature:**
+
+1. Download **FreeVK** from [https://freevirtualkeyboard.com/](https://freevirtualkeyboard.com/).
+2. Place `FreeVK.exe` **in the same folder** as `ControllerToCursor.exe`.
+3. Assign a controller button to the **On Screen Keyboard** action in the Hotkeys tab.
+4. Press that button while emulation is active — the keyboard will pop up instantly.
+
+If `FreeVK.exe` is not found, the app will display an error message with a reminder of where to get it.
+
+
+
+### Features
 
 * **Mouse Emulation:** Control your cursor with the left analog stick. Supports acceleration for natural feel.
 * **Scroll Support:** Vertical and horizontal scrolling via the right stick.
@@ -32,22 +47,7 @@ A full-featured gamepad-to-mouse emulator with a clean dark GUI — use any cont
 
 
 
-#### On-Screen Keyboard (FreeVK)
-
-The **On Screen Keyboard** hotkey launches [FreeVK](https://freevirtualkeyboard.com/) — a free, lightweight virtual keyboard for Windows.
-
-**To use this feature:**
-
-1. Download **FreeVK** from [https://freevirtualkeyboard.com/](https://freevirtualkeyboard.com/).
-2. Place `FreeVK.exe` **in the same folder** as `ControllerToCursor.exe`.
-3. Assign a controller button to the **On Screen Keyboard** action in the Hotkeys tab.
-4. Press that button while emulation is active — the keyboard will pop up instantly.
-
-If `FreeVK.exe` is not found, the app will display an error message with a reminder of where to get it.
-
-
-
-#### Configuration
+### Configuration
 
 On first launch, a `ControllerToCursor-config.toml` file is created automatically next to the executable with sensible defaults. All settings from the GUI are saved here.
 
@@ -69,7 +69,7 @@ All bindings can be reassigned freely in the **Hotkeys** tab.
 
 
 
-#### GUI Overview
+### GUI Overview
 
 The app has four tabs:
 
@@ -80,7 +80,7 @@ The app has four tabs:
 
 
 
-#### Tips
+### Tips
 
 * Run **Button Calibration** first if this is your first time using the app or if you have a non-Xbox controller.
 * The **Toggle Hotkey** feature supports up to 4 buttons that must all be held simultaneously — useful for chord combos that won't fire by accident.
@@ -89,7 +89,7 @@ The app has four tabs:
 
 
 
-#### Legal Disclaimer
+### Legal Disclaimer
 
 This tool is for personal and private use only.
 
@@ -98,7 +98,7 @@ This tool is for personal and private use only.
 
 
 
-#### Credits \& Third-Party Licenses
+### Credits \& Third-Party Licenses
 
 This application uses the following open-source projects:
 
