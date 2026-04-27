@@ -1,0 +1,34 @@
+[hotkeys]
+toggle_hotkey_1 = "DP-U"
+toggle_hotkey_2 = "Y"
+toggle_hotkey_3 = ""
+toggle_hotkey_4 = ""
+left_mouse = "A"
+right_mouse = "B"
+quit = "DP-D"
+speech_to_text = "DP-L"
+on_screen_keyboard = "DP-R"
+mouse_speed_boost = "LS"
+sniper_mode = "LB"
+
+[mouse]
+sensitivity = 10
+scroll_sensitivity = 10
+use_acceleration = true
+
+[buttons]
+A = 0
+B = 1
+X = 2
+Y = 3
+left_stick_button = 8
+right_stick_button = 9
+right_menu = 7
+left_menu = 6
+right_shoulder_button = 5
+left_shoulder_button = 4
+
+[advanced]
+deadzone = 0.01
+sniper_factor = 0.1
+h_scroll = true
