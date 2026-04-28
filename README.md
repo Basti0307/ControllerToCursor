@@ -78,6 +78,8 @@ The app has four tabs:
 * **Buttons** — Maps physical controller buttons to internal pygame indices. Run the **Button Calibration** wizard here if your controller's buttons aren't being recognized correctly.
 * **Mouse** — Adjust pointer sensitivity (1–20), scroll sensitivity, acceleration toggle, horizontal scroll toggle, and the sniper slowdown factor.
 
+<img width="446" height="713" alt="Screenshot 2026-04-28 140204" src="https://github.com/user-attachments/assets/8f19a0fb-483e-43e4-a98e-421be9e7d3bb" />
+
 
 
 ### Tips
