@@ -1,6 +1,9 @@
 """
 Controller Mouse Emulator — GUI Edition
 Full-featured gamepad-to-mouse emulator with tkinter GUI.
+
+PyInstaller build command:
+pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." ControllerToCursor.py
 """
 
 import sys
@@ -451,7 +454,7 @@ def main_loop():
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Controller Mouse")
+        self.title("ControllerToCursor")
         self.minsize(888, 1379)
         self.geometry("888x1379")
 
