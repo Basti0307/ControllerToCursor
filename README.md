@@ -7,11 +7,13 @@ A full-featured gamepad-to-mouse emulator with a clean dark GUI — use any cont
 ### Installation \& Usage
 
 1. Go to the [Releases](https://github.com/Basti0307/ControllerToCursor/releases) page.
-2. Download `ControllerToCursor.exe`.
+2. Download the newest `ControllerToCursor.exe`.
 3. Run the executable — no installation required.
 4. Plug in your controller **before** launching, or click **Rescan controller** after connecting it.
 
 >  **Note:** Antivirus software may flag the .exe as a "False Positive" because it was compiled with PyInstaller. This is a known and common issue with Python executables and is safe to ignore.
+
+**When something isn't working properly, please first refer to the Tips section of this file to make sure that everything was set up correctly.**
 
 
 
@@ -21,9 +23,9 @@ The **On Screen Keyboard** hotkey launches [FreeVK](https://freevirtualkeyboard.
 
 **To use this feature:**
 
-1. Download **FreeVK** from [https://freevirtualkeyboard.com/](https://freevirtualkeyboard.com/).
+1. Download the portable **FreeVK** executable from [https://freevirtualkeyboard.com/](https://freevirtualkeyboard.com/).
 2. Place `FreeVK.exe` **in the same folder** as `ControllerToCursor.exe`.
-3. Assign a controller button to the **On Screen Keyboard** action in the Hotkeys tab.
+3. Assign a controller button to the **On Screen Keyboard** action in the Hotkeys tab (set to the right d-pad by default).
 4. Press that button while emulation is active — the keyboard will pop up instantly.
 
 If `FreeVK.exe` is not found, the app will display an error message with a reminder of where to get it.
@@ -34,7 +36,7 @@ If `FreeVK.exe` is not found, the app will display an error message with a remin
 
 * **Mouse Emulation:** Control your cursor with the left analog stick. Supports acceleration for natural feel.
 * **Scroll Support:** Vertical and horizontal scrolling via the right stick.
-* **Sniper Mode:** Hold a button to dramatically slow the cursor for pixel-precise aiming.
+* **Sniper Mode:** Hold a button to dramatically slow the cursor for precise aiming.
 * **Speed Boost:** Hold a button to temporarily double the mouse speed.
 * **Left \& Right Click:** Map any controller button to left and right mouse buttons.
 * **On-Screen Keyboard:** Instantly open a virtual keyboard with a single button press (requires FreeVK).
@@ -62,8 +64,8 @@ On first launch, a `ControllerToCursor-config.toml` file is created automaticall
 |Quit|D-Pad Down|
 |Speech To Text|D-Pad Left|
 |On Screen Keyboard|D-Pad Right|
-|Speed Boost (gives the cursor a slight boost in speed)|Left Stick Click (L3)|
-|Sniper Mode (slows the cursor down)|Left Bumper (LB)|
+|Speed Boost (gives the cursor a slight boost in speed)|Left Stick Click|
+|Sniper Mode (slows the cursor down)|Left Bumper|
 
 All bindings can be reassigned freely in the **Hotkeys** tab.
 
@@ -78,6 +80,8 @@ The app has four tabs:
 * **Buttons** — Maps physical controller buttons to internal pygame indices. Run the **Button Calibration** wizard here if your controller's buttons aren't being recognized correctly.
 * **Mouse** — Adjust pointer sensitivity (1–20), scroll sensitivity, acceleration toggle, horizontal scroll toggle, and the sniper slowdown factor.
 
+<img width="446" height="713" alt="Screenshot 2026-04-28 140204" src="https://github.com/user-attachments/assets/8f19a0fb-483e-43e4-a98e-421be9e7d3bb" />
+
 
 
 ### Tips
@@ -85,7 +89,7 @@ The app has four tabs:
 * Run **Button Calibration** first if this is your first time using the app or if you have a non-Xbox controller.
 * The **Toggle Hotkey** feature supports up to 4 buttons that must all be held simultaneously — useful for chord combos that won't fire by accident.
 * Settings are saved per-button via **Save** buttons in each tab, not globally, so you can adjust one section without affecting the others.
-* The config `.toml` file can be hand-edited with any text editor for advanced setups.
+* The `ControllerToCursor-config.toml` file can be hand-edited with any text editor for advanced setups.
 
 
 
