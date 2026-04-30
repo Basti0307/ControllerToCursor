@@ -3,7 +3,12 @@ Controller Mouse Emulator — GUI Edition
 Full-featured gamepad-to-mouse emulator with tkinter GUI.
 
 PyInstaller build command:
-pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." ControllerToCursor.py
+Windows: pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico;." ControllerToCursor.py
+Linux: pyinstaller --onefile --windowed --icon=icon.ico --add-data "icon.ico:." ControllerToCursor.py
+
+Pip dependencies:
+pip install pygame pyautogui tomli-w pyinstaller
+
 """
 
 import sys
@@ -455,9 +460,22 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ControllerToCursor")
-        self.minsize(888, 1379)
-        self.geometry("888x1379")
+        
+        # Automaticalley adjust to different screensizes
+        if (self.winfo_screenwidth == 3840):
+            self.minsize(888, 1379)
+            self.geometry("888x1379")
+        elif (self.winfo_screenheight == 1440):
+            self.minsize(592, 920)
+            self.geometry("592x920")
+        elif(self.winfo_screenwidth == 1920): 
+            self.minsize(444, 690)
+            self.geometry("444x690")
+        else:
+            self.minsize(592, 920)
+            self.geometry("592x920")
 
+    
         # Fonts
         self.FH  = ("Segoe UI", 10)
         self.FB  = ("Segoe UI", 10, "bold")
