@@ -53,6 +53,9 @@ input_capture_active = False
 mouse_residual_x = 0.0
 mouse_residual_y = 0.0
 
+screen_h = 0
+screen_w = 0
+
 button_memory  = {}
 frame_cache    = {}
 last_frame_ts  = 0
@@ -350,7 +353,7 @@ def emulate_mouse():
     h_scroll_on  = bool(config["advanced"].get("h_scroll", True))
 
     sens = (ui_sens / 10.0)
-    scroll_sens = (ui_scroll / 10.0)
+    scroll_sens = (ui_scroll / 3.0)
 
     # Speed boost
     if is_pressed("mouse_speed_boost") in ("is_held", "just_pressed"):
@@ -428,26 +431,56 @@ def emulate_mouse():
     except Exception:
         pass
 
-    # Vertical scroll — right stick Y axis 3
+    # Scroll handling (Linux = step-based, Windows = proportional) ---
+    def handle_scroll(axis_value, last_time_attr, is_vertical):
+        boost = 2 if is_pressed("mouse_speed_boost") in ("is_held", "just_pressed") else 1
+
+        # Linux: step-based scrolling for stability
+        if sys.platform.startswith("linux"):
+            if abs(axis_value) < threshold:
+                setattr(app, last_time_attr, time.time())
+                return
+
+            now = time.time()
+            interval = 0.06 / boost   # boost makes scroll faster
+
+            if now - getattr(app, last_time_attr, 0) > interval:
+                direction = -1 if axis_value > 0 else 1
+                if is_vertical:
+                    pyautogui.scroll(direction)
+                else:
+                    pyautogui.hscroll(direction)
+                setattr(app, last_time_attr, now)
+
+        # Windows: proportional scrolling
+        else:
+            if abs(axis_value) < threshold:
+                return
+            amount = int(axis_value * scroll_sens * 5 * boost)
+            if amount != 0:
+                if is_vertical:
+                    pyautogui.scroll(-amount)
+                else:
+                    pyautogui.hscroll(amount)
+
+
+    # --- Vertical scroll (axis 3) ---
     try:
         if controller.get_numaxes() > 3:
             s = controller.get_axis(3)
-            sv = s if abs(s) > threshold else 0.0
-            if sv:
-                pyautogui.scroll(int(sv * scroll_sens * 5) * -1)
+            handle_scroll(s, "last_scroll_time_v", True)
     except Exception:
         pass
 
-    # Horizontal scroll — right stick X axis 2
+    # --- Horizontal scroll (axis 2) ---
     if h_scroll_on:
         try:
             if controller.get_numaxes() > 2:
                 h = controller.get_axis(2)
-                hv = h if abs(h) > threshold else 0.0
-                if hv:
-                    pyautogui.hscroll(int(hv * scroll_sens * 5))
+                handle_scroll(h, "last_scroll_time_h", False)
         except Exception:
             pass
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main loop (runs in background thread)
@@ -467,6 +500,8 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ControllerToCursor")
+
+        global screen_h, screen_w
         
         # Automaticalley adjust to different screensizes
         screen_w = self.winfo_screenwidth()
