@@ -15,6 +15,8 @@ A full-featured gamepad-to-mouse emulator with a clean dark GUI — use any cont
 
 **When something isn't working properly, please first refer to the Tips section of this file to make sure that everything was set up correctly.**
 
+**When you are using Linux, scroll down to the Linux-notes section for more detail.** 
+
 
 
 ### On-Screen Keyboard (FreeVK)
@@ -30,7 +32,11 @@ The **On Screen Keyboard** hotkey launches [FreeVK](https://freevirtualkeyboard.
 
 If `FreeVK.exe` is not found, the app will display an error message with a reminder of where to get it.
 
+### Linux-notes
+To use the Linux version go to the [Releases](https://github.com/Basti0307/ControllerToCursor/releases) page and download the latest version of ControllerToCursor-linux.tar.gz and extract its content.
+When after double clicking the main file the error "Unknown Filetype" pops up you have to open the command promt next to the file and run **"chmod +x ControllerToCursor-v[current version]-linux-x64"** to make the programm executable.
 
+To use the feature "On screen Keyboard" on linux, you don't have to download FreeVK. Only when the default Linux on screen keyboard is not found, you have to run **"sudo apt-get install onboard"** in a Terminal to download and install it. Unfortounately, the speech to text option can currently not be used in Linux.
 
 ### Features
 
