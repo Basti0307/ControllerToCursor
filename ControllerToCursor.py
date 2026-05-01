@@ -25,6 +25,9 @@ import tomli_w
 warnings.filterwarnings("ignore")
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
+if sys.platform.startswith("linux"):
+    os.environ.setdefault("DISPLAY", ":0")
+
 _stderr = sys.stderr
 sys.stderr = io.StringIO()
 import pygame
@@ -45,7 +48,7 @@ controller_count  = 0
 config            = {}
 emulation_mode    = True
 sniper_mode       = False
-calibrated_deadzone = 0.08   # default, overwritten by calibrate_deadzone()
+calibrated_deadzone = 0.08
 input_capture_active = False
 mouse_residual_x = 0.0
 mouse_residual_y = 0.0
@@ -172,7 +175,7 @@ def load_config():
                 "right_menu": 7, "left_menu": 6,
                 "right_shoulder_button": 5, "left_shoulder_button": 4,
             },
-            "advanced": {"deadzone": 0.01, "sniper_factor": 0.1, "h_scroll": True},
+            "advanced": {"deadzone": 0.01, "sniper_factor": 0.25, "h_scroll": True},
         }
         # Save the newly created default config
         try:
@@ -190,7 +193,7 @@ def load_config():
     config["mouse"].setdefault("scroll_sensitivity", 10)
     config["mouse"].setdefault("use_acceleration",  True)
     config["advanced"].setdefault("deadzone",       0.01)
-    config["advanced"].setdefault("sniper_factor",  0.1)
+    config["advanced"].setdefault("sniper_factor",  0.25)
     config["advanced"].setdefault("h_scroll",       True)
     for a in HOTKEY_ACTIONS:
         config["hotkeys"].setdefault(a, "")
@@ -211,6 +214,7 @@ def init_controller():
     global controller, controller_count
     pygame.init()
     pygame.joystick.init()
+    pygame.event.pump()
     controller_count = pygame.joystick.get_count()
     if controller_count == 0:
         controller = None
@@ -223,6 +227,7 @@ def rescan_controller():
     global controller, controller_count
     pygame.joystick.quit()
     pygame.joystick.init()
+    pygame.event.pump()
     controller_count = pygame.joystick.get_count()
     if controller_count == 0:
         controller = None
@@ -371,19 +376,30 @@ def emulate_mouse():
 
     # System hotkeys
     if is_pressed("speech_to_text") == "just_pressed":
-        pyautogui.hotkey('win', 'h')
+        if sys.platform.startswith("linux"):
+            app._notify("warn", "This Feature is not availible on Linux")
+        else:
+            pyautogui.hotkey('win', 'h')
+    
     if is_pressed("on_screen_keyboard") == "just_pressed":
-        if getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.executable)
-        else:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(base_dir, "FreeVK.exe")
-        if os.path.exists(file_path):
+        if sys.platform.startswith("linux"):
             try:
-                subprocess.Popen(file_path)
-            except Exception: pass
+                subprocess.Popen(["onboard"])
+            except Exception:
+                app._notify("err", "Onboard not found. Install with: sudo apt install onboard")
         else:
-            app._notify("error", "FreeVK.exe not found in application directory. Get one at 'https://freevirtualkeyboard.com/'!")
+            if getattr(sys, 'frozen', False):
+                base_dir = os.path.dirname(sys.executable)
+            else:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+            file_path = os.path.join(base_dir, "FreeVK.exe")
+            if os.path.exists(file_path):
+                subprocess.Popen(file_path)
+            else:
+                app._notify("error", "FreeVK.exe not found. Get it from: https://freevirtualkeyboard.com/")
+
+
+
 
     # Mouse movement — left stick axes 0/1
     try:
@@ -462,18 +478,20 @@ class App(tk.Tk):
         self.title("ControllerToCursor")
         
         # Automaticalley adjust to different screensizes
-        if (self.winfo_screenwidth == 3840):
-            self.minsize(888, 1379)
-            self.geometry("888x1379")
-        elif (self.winfo_screenheight == 1440):
-            self.minsize(592, 920)
-            self.geometry("592x920")
-        elif(self.winfo_screenwidth == 1920): 
-            self.minsize(444, 690)
-            self.geometry("444x690")
+        screen_w = self.winfo_screenwidth()
+        screen_h = self.winfo_screenheight()
+
+        if screen_w >= 3840:
+            width, height = 888, 1379
+        elif screen_w >= 2560:
+            width, height = 700, 1100
+        elif screen_w >= 1920:
+            width, height = 600, 960
         else:
-            self.minsize(592, 920)
-            self.geometry("592x920")
+            width, height = 300, 400
+
+        self.minsize(width, height)
+        self.geometry(f"{width}x{height}")
 
     
         # Fonts
@@ -509,6 +527,7 @@ class App(tk.Tk):
                 base_dir = sys._MEIPASS
             else:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
+
             icon_path = os.path.join(base_dir, "icon.ico")
             self.iconbitmap(icon_path)
         except Exception:

@@ -30,5 +30,5 @@ left_shoulder_button = 4
 
 [advanced]
 deadzone = 0.01
-sniper_factor = 0.1
+sniper_factor = 0.25
 h_scroll = true
