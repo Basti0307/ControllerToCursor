@@ -342,10 +342,6 @@ def emulate_mouse():
     if controller is None or not config:
         return
 
-    # Sensitivity mapping change:
-    # The UI shows 1..20 but user requested that value 3 in old code should behave like center (10).
-    # To achieve that, we remap the stored sensitivity (1..20) so that 10 is the neutral "default feel".
-    # We'll apply a scaling factor so that lower numbers are less sensitive and 10 is the baseline.
     ui_sens      = float(config["mouse"].get("sensitivity", 10))
     ui_scroll    = float(config["mouse"].get("scroll_sensitivity", 10))
     use_accel    = bool(config["mouse"].get("use_acceleration", True))
@@ -353,11 +349,7 @@ def emulate_mouse():
     sniper_fac   = float(config["advanced"].get("sniper_factor", 0.1))
     h_scroll_on  = bool(config["advanced"].get("h_scroll", True))
 
-    # Remap UI sensitivity so that 10 is the "center" baseline.
-    # We'll compute a multiplier where ui_sens == 10 -> multiplier 1.0,
-    # ui_sens < 10 -> multiplier < 1, ui_sens > 10 -> multiplier > 1.
-    # Use an exponential mapping for smooth feel.
-    sens = (ui_sens / 10.0)  # 10 -> 1.0, 3 -> 0.3, etc.
+    sens = (ui_sens / 10.0)
     scroll_sens = (ui_scroll / 10.0)
 
     # Speed boost
@@ -418,7 +410,6 @@ def emulate_mouse():
             mx = x * sens * scale
             my = y * sens * scale
 
-        # Keep a small minimum movement in sniper mode to avoid "stuck" feel.
         if sniper_active:
             if x and abs(mx) < 0.2:
                 mx = math.copysign(0.2, x)
@@ -500,7 +491,7 @@ class App(tk.Tk):
         self.FT = ("Segoe UI", 15, "bold")
         self.FSM = ("Segoe UI", 9)
 
-        # Design tokens: dark shell, restrained accent, long-session readability
+        # Design tokens
         self.BG = "#0f1419"
         self.PANEL = "#1a2332"
         self.CARD = "#1c2435"
@@ -521,6 +512,7 @@ class App(tk.Tk):
         self._hk_listen_prev_emu = True
         self._hk_assign_buttons = {}
         self.resizable(True, True)
+
         # Icon logic
         try:
             if getattr(sys, 'frozen', False):
@@ -1216,7 +1208,7 @@ class App(tk.Tk):
             self._notify("err", f"Could not save: {r}")
 
     def _save_mouse(self):
-        # Save UI values directly; emulate_mouse will remap so that 10 is center baseline
+        # Save UI values
         config["mouse"]["sensitivity"]        = max(1, min(20, int(self.sens_var.get())))
         config["mouse"]["scroll_sensitivity"] = max(1, min(20, int(self.scrl_var.get())))
         config["mouse"]["use_acceleration"]   = self.accel_var.get()
