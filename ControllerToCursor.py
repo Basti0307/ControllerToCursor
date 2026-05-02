@@ -24,6 +24,7 @@ import tomli_w
 
 warnings.filterwarnings("ignore")
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+os.environ['SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS'] = '1'
 
 if sys.platform.startswith("linux"):
     os.environ.setdefault("DISPLAY", ":0")
@@ -213,8 +214,12 @@ def save_config():
 # ─────────────────────────────────────────────────────────────────────────────
 # Controller init
 # ─────────────────────────────────────────────────────────────────────────────
+
+# Index of the currently selected joystick (chosen via dropdown when >1)
+selected_controller_index = 0
+
 def init_controller():
-    global controller, controller_count
+    global controller, controller_count, selected_controller_index
     pygame.init()
     pygame.joystick.init()
     pygame.event.pump()
@@ -222,22 +227,51 @@ def init_controller():
     if controller_count == 0:
         controller = None
         return False
-    controller = pygame.joystick.Joystick(0)
+    idx = min(selected_controller_index, controller_count - 1)
+    controller = pygame.joystick.Joystick(idx)
     controller.init()
     return True
 
+_controller_lock = threading.Lock()
+
 def rescan_controller():
-    global controller, controller_count
-    pygame.joystick.quit()
-    pygame.joystick.init()
-    pygame.event.pump()
-    controller_count = pygame.joystick.get_count()
-    if controller_count == 0:
-        controller = None
-        return False
-    controller = pygame.joystick.Joystick(0)
-    controller.init()
-    return True
+    """Manual rescan — safe to call from any thread. Never reinits the joystick subsystem."""
+    global controller, controller_count, selected_controller_index
+    with _controller_lock:
+        count = pygame.joystick.get_count()
+        controller_count = count
+        if count == 0:
+            controller = None
+            return False
+        idx = min(selected_controller_index, count - 1)
+        joy = pygame.joystick.Joystick(idx)
+        joy.init()
+        controller = joy
+        return True
+
+def select_controller(index: int):
+    """Switch the active controller to a specific joystick index."""
+    global selected_controller_index
+    selected_controller_index = index
+    rescan_controller()
+
+def _background_auto_scan():
+    """Watches for plug/unplug by polling get_count(). Never calls joystick.quit/init."""
+    import time as _time
+    prev_count = -1
+    while True:
+        try:
+            count = pygame.joystick.get_count()
+            if count != prev_count:
+                prev_count = count
+                rescan_controller()
+                try:
+                    app.after(0, lambda c=count: app._on_controller_count_changed(c))
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        _time.sleep(2)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Input detection
@@ -336,7 +370,7 @@ def toggle_emulation_mode():
         if all_down and any_new_press:
             emulation_mode = not emulation_mode
 
-    if is_pressed("quit") == "just_pressed":
+    if (is_pressed("quit") == "just_pressed") and emulation_mode == True:
         pygame.quit()
         os.kill(os.getpid(), 9)
 
@@ -488,9 +522,16 @@ def emulate_mouse():
 def main_loop():
     while True:
         pygame.event.pump()
-        toggle_emulation_mode()
+
         if emulation_mode:
-            emulate_mouse()
+            with _controller_lock:
+                toggle_emulation_mode()
+                emulate_mouse()
+        else:
+            with _controller_lock:
+                toggle_emulation_mode()
+
+        time.sleep(0.001) 
         clock.tick(120)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -591,25 +632,48 @@ class App(tk.Tk):
             arrowcolor=self.MUTED,
         )
         style.map("TScrollbar", background=[("active", self.BORDER)])
+
         style.configure(
             "TCombobox",
             fieldbackground=self.ELEVATED,
-            background=self.ELEVATED,
+            background=self.BORDER,
             foreground=self.TEXT,
-            arrowcolor=self.MUTED,
+            arrowcolor=self.ACCENT,
             borderwidth=0,
-            lightcolor=self.ELEVATED,
-            darkcolor=self.ELEVATED,
-            bordercolor=self.ELEVATED,
+            relief="flat",
+            padding=4
         )
+        
         style.map(
             "TCombobox",
-            fieldbackground=[("readonly", self.ELEVATED)],
-            selectbackground=[("readonly", self.TAB_SEL)],
-            bordercolor=[("focus", self.ELEVATED)],
-            lightcolor=[("focus", self.ELEVATED)],
-            darkcolor=[("focus", self.ELEVATED)],
+            fieldbackground=[("readonly", self.ELEVATED), ("focus", self.ELEVATED)],
+            selectbackground=[("readonly", self.ELEVATED)],
+            selectforeground=[("readonly", self.TEXT)],
+            background=[("active", self.ACCENT_DIM)]
         )
+
+        style.layout("TCombobox", [
+            ('combobox.field', {
+                'sticky': 'nswe',
+                'children': [
+                    ('combobox.downarrow', {'side': 'right', 'sticky': 'ns'}),
+                    ('combobox.padding', {
+                        'expand': '1',
+                        'sticky': 'nswe',
+                        'children': [
+                            ('combobox.textarea', {'sticky': 'nswe'})
+                        ]
+                    })
+                ]
+            })
+        ])
+
+        self.option_add("*TCombobox*Listbox.background", self.ELEVATED)
+        self.option_add("*TCombobox*Listbox.foreground", self.TEXT)
+        self.option_add("*TCombobox*Listbox.selectBackground", self.ACCENT)
+        self.option_add("*TCombobox*Listbox.selectForeground", "white")
+        self.option_add("*TCombobox*Listbox.font", self.FH)
+        self.option_add("*TCombobox*Listbox.borderwidth", "0")
 
     def _build_ui(self):
         self._apply_ttk_theme()
@@ -684,14 +748,31 @@ class App(tk.Tk):
         c = self._card(
             root,
             "Device",
-            "Connected gamepad reported by the driver. Use Rescan after plugging in hardware.",
+            "Connected gamepad reported by the driver. Controllers are detected automatically.",
         )
         self.lbl_ctrl_name = self._info_row(c, "Name", "—")
         self.lbl_ctrl_axes = self._info_row(c, "Axes", "—")
         self.lbl_ctrl_btns = self._info_row(c, "Buttons", "—")
+
+        # Controller selector row (dropdown + rescan button)
+        sel_row = tk.Frame(c, bg=self.CARD)
+        sel_row.pack(fill="x", pady=(8, 0))
+        tk.Label(sel_row, text="Active controller:", font=self.FSM, bg=self.CARD, fg=self.MUTED).pack(side="left")
+        self._ctrl_select_var = tk.StringVar(value="Auto")
+        self._ctrl_dropdown = ttk.Combobox(
+            sel_row,
+            textvariable=self._ctrl_select_var,
+            values=["No controller found"],
+            width=30,
+            state="readonly",
+        )
+        self._ctrl_dropdown.pack(side="left", padx=(8, 8))
+        self._ctrl_dropdown.bind("<<ComboboxSelected>>", self._on_ctrl_dropdown_select)
         btn_row = tk.Frame(c, bg=self.CARD)
         btn_row.pack(fill="x", pady=(4, 0))
         self._btn(btn_row, "Rescan controller", self._rescan).pack(side="left")
+        # Populate dropdown on startup
+        self.after(100, lambda: self._on_controller_count_changed(controller_count))
 
         c2 = self._card(
             root,
@@ -1208,13 +1289,48 @@ class App(tk.Tk):
         emulation_mode = not emulation_mode
         self._refresh_status()
 
+    def _on_controller_count_changed(self, count):
+        """Called by the background auto-scan thread when controller count changes."""
+        try:
+            if count == 0:
+                self._ctrl_dropdown.config(values=["No controller found"], state="disabled")
+                self._ctrl_select_var.set("No controller found")
+            else:
+                names = []
+                for i in range(count):
+                    try:
+                        j = pygame.joystick.Joystick(i)
+                        j.init()
+                        names.append(f"[{i}] {j.get_name()}")
+                    except Exception:
+                        names.append(f"[{i}] Controller {i}")
+                self._ctrl_dropdown.config(values=names, state="readonly")
+                # Keep selection if still valid, else default to first
+                idx = min(selected_controller_index, count - 1)
+                self._ctrl_select_var.set(names[idx])
+            self._refresh_status()
+        except Exception:
+            pass
+
+    def _on_ctrl_dropdown_select(self, _event=None):
+        """User picked a different controller from the dropdown."""
+        val = self._ctrl_select_var.get()
+        try:
+            idx = int(val.split("]")[0].replace("[", "").strip())
+        except Exception:
+            idx = 0
+        select_controller(idx)
+        self._refresh_status()
+        self._notify("ok", f"Switched to: {val}")
+
     def _rescan(self):
         ok = rescan_controller()
+        self._on_controller_count_changed(controller_count)
         self._refresh_status()
         if not ok:
             self._notify(
                 "warn",
-                "No controller found. Plug in a device and tap Rescan controller.",
+                "No controller found. Plug in a device — it will be detected automatically.",
             )
 
     def _quit(self):
@@ -1382,4 +1498,7 @@ if __name__ == "__main__":
     # Start background main loop
     t = threading.Thread(target=main_loop, daemon=True)
     t.start()
+    # Start background controller auto-scan
+    t_scan = threading.Thread(target=_background_auto_scan, daemon=True)
+    t_scan.start()
     app.mainloop()
