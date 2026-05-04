@@ -1,20 +1,48 @@
+[setup]
+welcome_dismissed = false
+
 [hotkeys]
-toggle_hotkey_1 = "DP-U"
-toggle_hotkey_2 = "Y"
-toggle_hotkey_3 = ""
-toggle_hotkey_4 = ""
-left_mouse = "A"
-right_mouse = "B"
-quit = "DP-D"
-speech_to_text = "DP-L"
-on_screen_keyboard = "DP-R"
-mouse_speed_boost = "LS"
-sniper_mode = "LB"
+toggle_emulation = [
+    "DP-U",
+    "Y",
+]
+left_mouse = [
+    "A",
+]
+right_mouse = [
+    "B",
+]
+quit = [
+    "DP-D",
+]
+speech_to_text = [
+    "DP-L",
+]
+on_screen_keyboard = [
+    "DP-R",
+]
+mouse_speed_boost = [
+    "LS",
+]
+sniper_mode = [
+    "LB",
+]
 
 [mouse]
 sensitivity = 10
 scroll_sensitivity = 10
 use_acceleration = true
+speed_boost_factor = 2.0
+
+[dpad]
+
+[dpad_bind]
+
+[axes]
+move_x = 0
+move_y = 1
+scroll_vertical = 3
+scroll_horizontal = 2
 
 [buttons]
 A = 0
